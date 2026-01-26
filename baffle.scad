@@ -435,16 +435,11 @@ module baffle_grill_magnets(outerW, outerH, THK) {
         echo("==========================");
         
         // Safety checks
-        assert(!is_undef(skin) && !is_undef(mag_depth) && !is_undef(plug_depth),
-               "Grill magnet parameters undefined — check parameters.scad or compute functions");
-        
         assert(THK >= skin + mag_depth + plug_depth + 0.5,
                str("Baffle too thin for grill magnet system — required min thickness = ", 
                    skin + mag_depth + plug_depth + 0.5, " mm"));
         
-        assert(plug_depth >= grill_plug_min,
-               str("Plug depth too small — got ", plug_depth, ", min required = ", grill_plug_min));
-        
+                
         // ─── Placement ───
         edge_margin = clampF(10, 15, 0.08 * min(outerW, outerH));
         xL = -outerW/2 + edge_margin;

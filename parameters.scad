@@ -62,7 +62,7 @@ function clampF(x, xmin, xmax) =
 // BOX GEOMETRY 
 // ======================================================================
 boxThickness   = 12;    // wall thickness (mm)
-edge_round_radius      = 3;    
+edge_round_radius      = 5;    
 round_horizontal_edges = true;
 frontTrim              = edge_round_radius; 
 
@@ -206,7 +206,7 @@ wooferX_offset = 8.48;
 baffleThickness = 12;
 baffleCornerR = 5;
 baffleEdgeStyle = 2;    // 0=flat, 1=chamfered, 2=rounded 
-baffleEdgeSize = 8;
+baffleEdgeSize = 5;
 baffleFrameInset = 20;
 
 driverRecessDepth = [3.0, 1.5, 5.7];  // Tweeter, Midrange, Woofer
@@ -261,25 +261,33 @@ outerH = 520;
 // baffleCornerR = 10;
 */
 
-// ─── GRILL MAGNET BOSSES ────────────────────────
-grill_boss_d = 10.0;     // outer diameter
-grill_boss_h = 5.5;      // height from back face
+// Magnet physical size + fit clearance
+grill_mag_dia   = 6.0;
+grill_mag_thk   = 3.0;
+grill_mag_clear = 0.3;
 
-// Cap (thin retention cap that fully encloses)
-grill_cap_thk   = 1.0;    // lid thickness
-grill_cap_lip   = 0.8;    // overlap onto boss for glue land
-grill_mag_proud = 0.3;    // magnet can sit proud on the back side
+// Protrusion amount (used by pocket depth)
+grill_mag_proud = 1.5;
 
-// ============================================================
-// GRILL MAGNET SYSTEM
-// ============================================================
-grill_mag_dia         = 6.0;      // nominal magnet diameter (used in cup/lid sizing)
-grill_mag_thk         = 3.0;      // nominal magnet thickness
-grill_mag_clear       = 0.3;      // clearance added to magnet diameter & thickness for fit
-grill_skin_min        = 1.2;      // minimum material thickness behind magnet pocket (cup base)
-grill_plug_min        = 5.0;      // minimum boss height (printable & structural)
-grill_dimple_dia      = 3.0;      // small front dimple
-grill_dimple_depth    = 0.5;
+// Boss geometry
+grill_boss_d    = 10.0;
+grill_boss_h    = 3.5;
+grill_boss_wall = 2.0;
+
+// Front skin (used in pocket positioning)
+grill_skin_min  = 1.2;
+
+// Retention cap dimensions (depends on proud + boss d)
+chamfer_depth = 0.8;
+chamfer_width = 1.0;
+grill_cap_thk      = 1.5;
+grill_cap_pocket_h = grill_mag_proud + 0.3;
+grill_cap_total_h  = grill_cap_thk + grill_cap_pocket_h;
+grill_cap_lip      = 0.8;
+
+// Cosmetic front features
+grill_dimple_dia   = 3.0;
+grill_dimple_depth = 0.5;
 
 /*
 // ============================================================

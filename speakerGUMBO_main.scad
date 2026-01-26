@@ -2,13 +2,14 @@
 // Top-level assembly and orchestration for G.U.M.B.O.
 // GUMBO - Great Utility for Music Box Optimization
 //
-// Speaker GUMBO v0.1.0 - 2026-01-26
+// Speaker GUMBO v0.1.1 - 2026-01-26
 // Added slot port support and bracing patterns
-version = "0.1.0";
+version = "0.1.1";
+echo("Speaker GUMBO version 0.1.0");
 
 export_mode = 0;           // 0=Full, 1=Box, 2=Back panel, 3=Baffle, 4=Slot Key, 5=Driver Fit Test
 explodeMode = true;
-explodeDistance = 40;      // mm — consider making dynamic: max(outerH, outerD, outerW) * 0.4 later
+explodeDistance = 30;      // mm — consider making dynamic: max(outerH, outerD, outerW) * 0.4 later
 
 include <parameters.scad>
 include <utils.scad>
@@ -190,53 +191,49 @@ if (export_mode == 0) {
     if (show_slot_key) {
         mid_explode_y = outerD/2 + (explodeMode ? explodeDistance / 2 : 0);
         translate([0, mid_explode_y, 0]) {
+            // Upper right: slot
             translate([baffleSlotPosX, 0, baffleSlotPosZ])
                 rotate([90,0,0]) slot();
-            translate([baffleKeyPosX, 0, baffleSlotPosZ])
+            // Lower left: key
+            translate([baffleKeyPosX, 0, baffleKeyPosZ])
                 rotate([0,0,0]) key();
         }
     }
 
     
-    // Grill — attached in normal view, jumps forward in exploded view
+    // Grill — anchored to the baffle front face, with independent explode offsets
     if (grill_enable) {
-        // Position of baffle's front face (exploded or not)
-        baffle_front_y =
-            outerD / 2
-            - (is_undef(frontTrim) ? 0 : frontTrim)
-            + baffleThickness
-            + (explodeMode ? explodeDistance : 0)
-            + (baffleEdgeStyle == 2 ? baffleEdgeSize : 0);
 
-        // Grill back face = baffle front + extra explode separation
-        grill_y = baffle_front_y
-                  + (explodeMode ? explodeDistance * 1.0 : 0);
+        // This is the exact world-space Y of the baffle's front-most face
+        baffle_front_y = baffleFrontMaxY;
 
-        echo("Grill placement:",
-             " baffle front Y =", baffle_front_y,
-             " extra explode separation =", explodeMode ? explodeDistance : 0,
-             " final grill back Y =", grill_y,
-             " gap from baffle front =", grill_y - baffle_front_y, " mm");
+        // Explode offsets (world-space)
+        grill_explode_y = explodeMode ? explodeDistance : 0;
 
-        // Group the grill + caps under one color/transform scope
-        color("Silver") {
-            translate([0, grill_y, 0]) {
-                grill_panel_flat(
-                    outerW,
-                    outerH,
-                    coreW,
-                    coreH,
-                    baffleCornerR
-                );
+        // Caps trail the grill by 5mm when exploded
+        caps_explode_y  = explodeMode ? max(explodeDistance - 5, 0) : 0;
 
-                // Add installed caps (only in full assembly / preview)
-                if (export_mode == 0) {
-                    color("DimGray") {  // slightly darker for contrast
-                        grill_installed_caps(outerW, outerH);
-                    }
-                }
-            }
-        }
+        // Assembled positions (explode=0)
+        // Caps sit directly on the baffle face
+        caps_y  = baffle_front_y + grill_cap_total_h + caps_explode_y;
+
+        // Grill sits in front of the caps in the assembled view
+        // (If grill_cap_total_h is truly the cap thickness, this is correct)
+        grill_y = baffle_front_y + grill_cap_total_h + grill_explode_y;
+
+        echo("GRILL ANCHOR baffle_front_y=", baffle_front_y,
+             "caps_y=", caps_y, "grill_y=", grill_y,
+             "delta(grill-caps)=", grill_y - caps_y);
+
+        // Caps (closest to baffle)
+        color("DimGray")
+            translate([0, caps_y, 0])
+                grill_installed_caps(outerW, outerH);
+
+        // Grill panel (in front of caps)
+        color("Silver")
+            translate([0, grill_y, 0])
+                grill_panel_flat(outerW, outerH, coreW, coreH, baffleCornerR);
     }
 }
     

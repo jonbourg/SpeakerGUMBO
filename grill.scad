@@ -53,16 +53,10 @@ module grill_panel_2d(outer_w, outer_h, core_w, core_h, corner_r) {
 // ────────────────────────────────────────────────
 module grill_bosses(outer_w, outer_h) {
     pos = grill_mag_positions_xz(outer_w, outer_h);
-
     for (p = pos) {
         translate([p[0], -grill_boss_h, p[1]])
             rotate([-90, 0, 0])
-                cylinder(
-                    d = grill_boss_d,
-                    h = grill_boss_h,
-                    center = false,
-                    $fn = 32
-                );
+                cylinder(d = grill_boss_d, h = grill_boss_h, center = false, $fn = 32);
     }
 }
 
@@ -70,26 +64,14 @@ module grill_bosses(outer_w, outer_h) {
 // MAGNET CAVITIES — Rear-inserted in bosses
 // ────────────────────────────────────────────────
 module grill_magnet_cavities(outer_w, outer_h) {
-    mag_d = grill_mag_dia + 2 * grill_mag_clear;           // 6.6 mm
-
-    // Controlled depth: magnet thickness + small recess + clearance
-    // 3.0 + 0.5 recess + 0.3 clearance = 3.8 mm max — but we'll cap it
-    mag_h = min(3.8, grill_mag_thk + grill_mag_clear + 0.5);  // safe max 3.8 mm
+    mag_d = grill_mag_dia + 2 * grill_mag_clear;  // e.g., 6.6 mm
+    cavity_depth = grill_mag_thk - grill_mag_proud + grill_mag_clear;  // shallow: full thk - proud + clear
 
     pos = grill_mag_positions_xz(outer_w, outer_h);
-
     for (p = pos) {
-        // Position so cavity back aligns with boss back
-        // Center the cylinder so only ~half protrudes backward if needed
-        translate([p[0], -grill_boss_h + (mag_h / 2) + 0.2, p[1]]) {   // +0.2 instead of +0.5 — gentler
+        translate([p[0], -grill_boss_h + cavity_depth / 2 - 0.01, p[1]]) {
             rotate([-90, 0, 0])
-                cylinder(
-                    d1 = mag_d + 0.8,     // slight flare at back for easy drop-in
-                    d2 = mag_d,
-                    h = mag_h + 0.5,      // small overshoot only — enough to clean cut
-                    center = true,
-                    $fn = 48
-                );
+                cylinder(d = mag_d, h = cavity_depth + 0.2, center = true, $fn = 48);
         }
     }
 }
@@ -97,32 +79,34 @@ module grill_magnet_cavities(outer_w, outer_h) {
 // ────────────────────────────────────────────────
 // MAGNET RETENTION CAP (printed separately)
 // ────────────────────────────────────────────────
+// This module works and puts a chamfer on the end of the cap, but no dimple
 module grill_mag_retention_cap() {
-    cap_od   = grill_boss_d + 2 * grill_cap_lip;          // outer diameter with lip
-    pocket_d = grill_mag_dia + 2 * grill_mag_clear + 0.15; // slight interference for press-fit
-    pocket_h = grill_mag_proud + grill_mag_clear + 0.2;   // how far magnet sits proud
-
-    cap_thk = 1.8;   // thickness of cap itself — 1.5–2.0 mm is sweet spot
+    cap_od = grill_boss_d;                // 10 mm
+    pocket_d = grill_mag_dia + 2 * grill_mag_clear + 0.15;
+    pocket_h = grill_mag_proud + 0.3;
+    cap_thk = grill_cap_thk; // use global
 
     difference() {
         union() {
-            // Main cap body
-            cylinder(d = cap_od, h = cap_thk + pocket_h, $fn = 48);
+            cylinder(d = cap_od, h = cap_thk + pocket_h - chamfer_depth, $fn = 48);
 
-            // Small insertion chamfer / lead-in on outer edge
-            translate([0, 0, cap_thk + pocket_h - 0.6])
-                cylinder(d1 = cap_od, d2 = cap_od + 0.8, h = 0.6, $fn = 48);
+            // Chamfer at HIGH Z / REAR (exposed side after rotation)
+            translate([0, 0, (cap_thk + pocket_h) - chamfer_depth])
+                cylinder(  // # for debug highlight (remove when done)
+                    d1 = cap_od,                      // wide at base (inside cap)
+                    d2 = cap_od - 2 * chamfer_width,  // narrow at very rear (exposed face)
+                    h = chamfer_depth,
+                    $fn = 48
+                );
         }
 
-        // Pocket for magnet (from back)
-        translate([0, 0, -0.01])
+        // Pocket from LOW Z / FRONT (against grill / boss)
+        translate([0, 0, -0.01])  // cut from bottom
             cylinder(d = pocket_d, h = pocket_h + 0.02, $fn = 48);
-
-        // Optional: small center dimple for easier removal with tool
-        translate([0, 0, cap_thk + pocket_h - 0.4])
-            cylinder(d = 2.5, h = 0.8, $fn = 32);
+        
     }
 }
+
 
 // ────────────────────────────────────────────────
 // FINAL 3D GRILL — Parametric
@@ -146,13 +130,16 @@ module grill_panel_flat(outer_w, outer_h, core_w, core_h, corner_r) {
 // Places caps on the back of each boss (for assembly visualization)
 module grill_installed_caps(outer_w, outer_h) {
     pos = grill_mag_positions_xz(outer_w, outer_h);
-
+    
+    // Caps Y offset logic:
+    // - Assembled (explodeDistance small/zero): no extra back offset → flush on baffle
+    // - Exploded: push caps back ~10 mm from bosses → visible separation from grill
+    extra_cap_back = (explodeDistance > 5) ? -5 : 0;
+    
     for (p = pos) {
-        // Position cap on back face of boss
-        // Boss back = Y = -grill_boss_h
-        // Cap sits flush or slightly recessed (adjust z-offset if needed)
-        translate([p[0], -grill_boss_h - grill_cap_thk/2 + 0.1, p[1]]) {  // +0.1 for slight recess
-            rotate([-90, 0, 0])
+        translate([p[0], -grill_boss_h - grill_cap_total_h / 2 + extra_cap_back + chamfer_depth, p[1]]) {
+            color("DimGray")
+            rotate([90, 0, 0])  // keep this if pocket faces grill; flip to [90,0,0] if needed
                 grill_mag_retention_cap();
         }
     }

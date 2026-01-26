@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.1.1] - 2026-01-26
+- corrected key position
+- made glue-on magnet caps for the grill
+- corrected exploding for the grill
+
 ## [0.1.0] - 2026-01-26
 - Initial multi-file structure
 - Basic enclosure, port, driver mount modules
