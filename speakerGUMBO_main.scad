@@ -1,5 +1,10 @@
 // speakerGUMBO_main.scad
 // Top-level assembly and orchestration for G.U.M.B.O.
+// GUMBO - Great Utility for Music Box Optimization
+//
+// Speaker GUMBO v0.1.0 - 2026-01-26
+// Added slot port support and bracing patterns
+version = "0.1.0";
 
 export_mode = 0;           // 0=Full, 1=Box, 2=Back panel, 3=Baffle, 4=Slot Key, 5=Driver Fit Test
 explodeMode = true;
