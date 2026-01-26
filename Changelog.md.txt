@@ -1,0 +1,17 @@
+# Changelog
+
+## [0.4.2] - 2026-01-26
+### Added
+- Added a new speaker grill option with magnets.
+	- New file grill.scad
+	- Many new parameters in parameters.scad
+
+
+### Changed
+- 
+
+### Fixed
+- Made box H,W,D calculations safe
+
+## [0.4.1] - 2026-02-20
+...
