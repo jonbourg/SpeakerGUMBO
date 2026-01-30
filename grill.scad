@@ -27,11 +27,12 @@ module grill_panel_2d(outer_w, outer_h, core_w, core_h, corner_r) {
     gW = outer_w - 2*grill_outer_inset - 2*grill_clearance;
     gH = outer_h - 2*grill_outer_inset - 2*grill_clearance;
 
-    innerW = max(1, core_w  - 2 * grill_border_w);
-    innerH = max(1, core_h  - 2 * grill_border_w);
+    innerW = gW - 2 * grill_hex_edge_margin;
+    innerH = gH - 2 * grill_hex_edge_margin;
+
 
     // Fill control — 1.0 = hexes touch mask edge, <1.0 = intentional inset
-    hex_fill_ratio = 0.995;   // very close to edge, slight safety
+    hex_fill_ratio = 2.0;   // very close to edge, slight safety
     // hex_fill_ratio = 1.0;  // max fill — may clip slightly on edges
 
     hex_flat = min(innerW, innerH) * hex_fill_ratio;

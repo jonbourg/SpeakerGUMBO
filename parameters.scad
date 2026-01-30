@@ -241,18 +241,20 @@ tabPocketClearance = 0.25;
 grill_enable = true;     // Set false to hide grill completely in all views
 
 // Grill sizing & fit
-grill_thk = 3.0;
+grill_thk = 2.4;
 grill_clearance = 1.0;
 grill_outer_inset = 8.0;
 
 // Frame
 grill_border_w = 0.0;
-grill_corner_radius_front = 12.0;
-corner_r = 0;
+grill_corner_radius_front = 10.0;
+
+//corner_r = 0;
 
 // Hex pattern
+grill_hex_edge_margin = 7.0;  
 grill_pattern_hex_flat = 10.0;
-grill_pattern_hex_gap  = 5.0;
+grill_pattern_hex_gap  = 4.0;
 
 /*
 // Example baffle size (standalone test)
@@ -311,8 +313,6 @@ grill_corner_adjust   = grill_edge_r;  // how much to reduce corner radius to co
 grill_pattern_hex_flat        = 6.0;      // flat-to-flat distance of each hex (core size before gap)
 grill_pattern_hex_gap         = 1.2;      // minimum wall thickness between hexes (material between openings)
 */
-
-
 
 
 // ======================================================================
