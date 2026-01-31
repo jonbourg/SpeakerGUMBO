@@ -6,24 +6,26 @@ include <utils.scad>
 include <drivers.scad>
 
 // Puck-specific tunables
-fit_text_size = 6.0;
+fit_text_size = 7.0;
 fit_text_depth = 0.6;
 fit_max_name_chars = 18;
-fit_inner_text_scale = 0.75;
+fit_inner_text_scale = 0.85;
 fit_min_text_radius = 4;
 fit_puck_margin_base = 8;
 fit_puck_extra_per_row = 12;
-fit_char_width_factor = 0.62;
+fit_char_width_factor = 1.5;
+fit_outer_text_margin = 3;   // mm beyond outer text
+fit_two_row_extra     = 3;   // mm extra if inner row exists
 
 // engraved_label_curved module (unchanged)
-module engraved_label_curved(label, radius, depth, size, font="Arial Rounded MT Bold:style=Bold", reverse = false) {
+module engraved_label_curved(label, radius, depth, size, font="DejaVu Sans Bold:style=Bold", reverse = false) {
     len_label = len(label);
     
     // Direction: positive for outer (clockwise), negative for inner (counter-clockwise)
     dir_multiplier = reverse ? 1 : 1;
     
     // Tighter spacing
-    char_angle = dir_multiplier * (360 / (len_label * 1.4));
+    char_angle = dir_multiplier * (360 / (len_label * 1.0));
     
     // Start offset - adjust for reverse to flip the starting point
     start_offset = reverse ? -90 : 90;
@@ -62,17 +64,42 @@ module driver_fit_test_puck(driver_idx = 2) {
     
     name = name_full; // temporary - comment out substr for now
     
-    base_str = str(name, " Ø", round(cutout_dia));
+    base_str = str(name, "   CUT|", round(cutout_dia), "   ");
     
     extras_parts = [
-        (screw_pcd > 0) ? str("PCD", round(screw_pcd)) : "",
-        (face_shape == 2 || face_shape == 6) && corner_r > 0 ? str("R", round(corner_r)) : "",
-        (face_shape == 4 || face_shape == 5) && clip_depth > 0
-            ? str("Flat", round(clipped_flat_chord_length(outer_dia, clip_depth)), " F2F", round(outer_dia - 2*clip_depth))
-            : "",
-        (face_shape == 7) && super_n != 1.0 ? str("n", super_n) : ""
-    ];
-    extras_str = str_join(extras_parts, " ");
+    (screw_pcd > 0)
+        ? str(" SCREW D|", screw_pcd, " ")
+        : "",
+
+    (flush_depth > 0)
+        ? str(" FLUSH D|", flush_depth, " ")
+        : "",
+    
+    (face_shape == 2 || face_shape == 6) && corner_r > 0
+        ? str(" CORN R|", 2 * corner_r, " ")
+        : "",
+
+    (face_shape == 4 || face_shape == 5) && clip_depth > 0
+        ? str(
+            " CLIP D|", clip_depth, " ",
+            " F2F|", (outer_dia - 2 * clip_depth), " "
+          )
+        : "",
+
+    (face_shape == 7) && super_n != 1.0
+        ? str("n", super_n)
+        : ""
+];
+
+    //extras_str = str_join(extras_parts, " ");
+    extras_str =
+    str(
+        extras_parts[0],
+        extras_parts[1],
+        extras_parts[2],
+        extras_parts[3]
+    );
+
     
     full_str = str(base_str, " ", extras_str);
     
@@ -90,21 +117,24 @@ module driver_fit_test_puck(driver_idx = 2) {
 
     // Outer radius - push farther out for bigger ring
     text_radius_outer = max(
-        outer_dia / 2 + 15,   // increased base clearance (was 4)
+        outer_dia / 2 + 16,   // increased base clearance (was 4)
         est_outer_w / (2 * PI) + 10  // extra buffer for longer text
     );
 
     // Inner radius - start closer to center, inside outer ring
     text_radius_inner = max(
-        outer_dia / 2 + 5,               // min inside outer ring
-        text_radius_outer - outer_size * 1.5 - est_inner_w / (2 * PI)  // pull inward more aggressively
+        outer_dia / 2 + 7,               // min inside outer ring
+        text_radius_outer - outer_size * 1.3 - est_inner_w / (2 * PI)  // pull inward more aggressively
     );
 
     // Puck radius - based on the outermost text
-    puck_radius = text_radius_outer + fit_puck_margin_base + 5;  // extra margin beyond outer text
+    // puck_radius = text_radius_outer + fit_puck_margin_base + 5;  // extra margin beyond outer text
 
-    extra_for_inner = use_two_rows ? 10 : 0;  // small extra if 2 rows (optional)
-    puck_radius_final = puck_radius + extra_for_inner;
+    // extra_for_inner = use_two_rows ? 10 : 0;  // small extra if 2 rows (optional)
+    // puck_radius_final = puck_radius + extra_for_inner;
+    
+    puck_radius = text_radius_outer + fit_outer_text_margin;
+    puck_radius_final = puck_radius + (use_two_rows ? fit_two_row_extra : 0);
 
     puck_dia = 2 * puck_radius_final;
     
@@ -154,9 +184,19 @@ module driver_fit_test_puck(driver_idx = 2) {
 
 // Safe str_join (non-recursive)
 function str_join(arr, delim = " ") =
-    str([for (i = [0 : len(arr)-1])
-        i == 0 ? arr[i] : str(delim, arr[i])
-    ]);
+    let(
+        parts = [
+            for (i = [0 : len(arr) - 1])
+                if (arr[i] != "") arr[i]
+        ]
+    )
+    len(parts) == 0 ? "" :
+    str(
+        parts[0],
+        [ for (i = [1 : len(parts) - 1]) str(delim, parts[i]) ]
+    );
+
+
 
 /*
 // Uncomment this to only see the driver fit test within this file

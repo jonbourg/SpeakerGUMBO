@@ -1,5 +1,52 @@
 # Changelog
 
+# G.U.M.B.O. Changelog
+
+## Version 0.1.3
+
+### Driver Fit Test Improvements
+- Refined the **driver fit test puck** to function as a reusable, physical spec record for each driver.
+- Removed all non–baffle-interface data from the fit test (no mounting depth, enclosure assumptions, or screw count).
+- Standardized compact, engraving-friendly dimension abbreviations:
+  - `CUT` / `COØ` — Cutout diameter
+  - `SCREW D` — Pitch Circle Diameter
+  - `CORN R` — Corner diameter
+  - `CLIP D` — Clip depth
+  - `F2F` — Face-to-face dimension
+  - 'FLUSH D' - Flush depth of speaker into baffle
+- Explicitly engraved **clip depth (CD)** for clipped and truncated circle face shapes.
+- Converted all corner geometry reporting to **corner diameter** for consistency and tooling clarity.
+- Retained face shape reporting in console specs, but intentionally omitted it from the fit test puck (geometry already conveys shape).
+- Eliminated stray engraved characters (`[ ] "`) by removing array stringification from text assembly.
+- Simplified and hardened curved-text generation logic for parser safety and reliability.
+
+### Driver Specs & Console Output
+- Expanded driver dimension specs to include:
+  - Cutout diameter for all face shapes (nominal or equivalent)
+  - Bounding box dimensions for baffle clearance
+  - Screw PCD (pitch circle diameter)
+  - Corner diameter where applicable
+  - Clip depth for clipped and truncated face shapes
+- Ensured all reported spec values reflect **explicit user-defined parameters**, not derived fallbacks.
+- Improved terminology consistency and readability across all face types.
+
+### Text Layout & Print Quality
+- Adjusted inner text placement to increase clearance from the cutout edge.
+- Reduced overall fit test puck diameter while preserving text positioning.
+- Finalized smaller, cleaner puck margins to reduce material usage.
+- Switched default engraving font to **DejaVu Sans Bold** for improved small-text legibility and print reliability.
+
+### Design Philosophy Updates
+- Clarified separation of concerns between:
+  - Geometry logic and human-readable specs
+  - Console diagnostics and engraved fit test memory
+- Reinforced the fit test puck’s role as a **verified baffle-interface record**, not a full driver datasheet.
+
+### Status
+- Driver fit test system stabilized and refined.
+- Next planned focus: **back panel review and port design**, followed by republishing G.U.M.B.O.
+
+
 ## [0.1.2] - 2026-01-31
 ### Added
 - New export mode structure:

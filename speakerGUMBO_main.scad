@@ -4,8 +4,8 @@
 //
 // Speaker GUMBO v0.1.1 - 2026-01-26
 // Added slot port support and bracing patterns
-version = "0.1.2";
-echo("Speaker GUMBO version 0.1.2");
+version = "0.1.3";
+echo("Speaker GUMBO version 0.1.3");
 
 // 0=Full, 1=Box, 2=Back panel, 3=Baffle, 4=Grill, 5=Small Parts, 6=Driver Fit Test
 export_mode = 0;           
@@ -301,10 +301,114 @@ if (showSpecs || export_mode == 0) {
     echo(str("Enabled drivers (count / indices): ", len(enabledDriverIdx), " → ", enabledDriverIdx));
     echo(str("Driver Z positions (mm): ", zPositions));
     
-    // Optional extras you can uncomment when needed
-    // echo(str("Baffle thickness (mm): ", baffleThickness));
-    // echo(str("Pocket opening (W × H mm): ", round(pocketW), " × ", round(pocketH)));
-    // if (grill_enable) echo("Grill: Enabled");
-    
+// ============================================================
+// DRIVER DIMENSION SPECS (Baffle Interface Only)
+// ============================================================
+
+for (j = [0 : len(driverParams) - 1]) {
+
+    shape = driverFaceShape[j];
+
+    // Common driver parameters
+    cutout_d  = driverParams[j][0];   // cutout diameter
+    screw_pcd = driverParams[j][1];   // screw spacing / PCD
+
+    echo("--------------------------------------------------");
+    echo(str("Driver ", j, " dimensions:"));
+
+    // Face shape (specs only – omit from fit test puck)
+    if (shape == 0)        echo("  Face shape: Round");
+    else if (shape == 1)   echo("  Face shape: Rectangular");
+    else if (shape == 2)   echo("  Face shape: Rounded rectangle");
+    else if (shape == 3)   echo("  Face shape: Rectangular (oval)");
+    else if (shape == 4)   echo("  Face shape: Clipped circle (4 flats)");
+    else if (shape == 5)   echo("  Face shape: Top / Bottom truncated circle");
+    else if (shape == 6)   echo("  Face shape: Squircle");
+    else if (shape == 7)   echo("  Face shape: Superellipse");
+
+    // Fastener geometry (public spec)
+    echo(str("  Screw PCD Ø (mm): ", round(screw_pcd)));
+
+    // --------------------------------------------------------
+    // ROUND
+    // --------------------------------------------------------
+    if (shape == 0) {
+        d = speakerFaceDiameters[j];
+
+        echo(str("  Cutout Ø (mm): ", round(d)));
+        echo(str("  Bounding box (mm): ", round(d), " x ", round(d)));
+    }
+
+    // --------------------------------------------------------
+    // RECTANGULAR / OVAL
+    // --------------------------------------------------------
+    else if (shape == 1 || shape == 3) {
+        w = driverRectSizes[j][0];
+        h = driverRectSizes[j][1];
+
+        echo(str("  Cutout Ø (equiv mm): ", round(diag(w, h))));
+        echo(str("  Bounding box (mm): ", round(w), " x ", round(h)));
+    }
+
+    // --------------------------------------------------------
+    // ROUNDED RECTANGLE
+    // --------------------------------------------------------
+    else if (shape == 2) {
+        w = driverRectSizes[j][0];
+        h = driverRectSizes[j][1];
+        r = driverCornerRadius[j];
+
+        echo(str("  Cutout Ø (equiv mm): ", round(diag(w, h))));
+        echo(str("  Bounding box (mm): ", round(w), " x ", round(h)));
+        echo(str("  Corner Ø (mm): ", round(2 * r)));
+    }
+
+    // --------------------------------------------------------
+    // CLIPPED CIRCLE (4 FLATS)
+    // --------------------------------------------------------
+    else if (shape == 4) {
+        d = speakerFaceDiameters[j];
+
+        userClip = driverClipDepth[j];
+        autoClip = 0.08 * d;
+        clip     = (userClip > 0) ? userClip : autoClip;
+
+        flat_len     = clipped_flat_chord_length(d, clip);
+        flat_to_flat = d - 2 * clip;
+
+        echo(str("  Cutout Ø (nominal mm): ", round(d)));
+        echo(str("  Clip depth per side (mm): ", driverClipDepth));
+        echo(str("  Bounding box (mm): ", round(flat_to_flat), " x ", round(flat_to_flat)));
+        echo(str("  Flat length (mm): ", round(flat_len)));
+    }
+
+    // --------------------------------------------------------
+    // TOP / BOTTOM CLIPPED CIRCLE
+    // --------------------------------------------------------
+    else if (shape == 5) {
+        d = speakerFaceDiameters[j];
+
+        userClip = driverClipDepth[j];
+        autoClip = 0.08 * d;
+        clip     = (userClip > 0) ? userClip : autoClip;
+
+        flat_to_flat = d - 2 * clip;
+
+        echo(str("  Cutout Ø (nominal mm): ", round(d)));
+        echo(str("  Clip depth per side (mm): ", driverClipDepth));
+        echo(str("  Bounding box (mm): ", round(d), " x ", round(flat_to_flat)));
+    }
+
+    // --------------------------------------------------------
+    // SQUIRCLE / SUPERELLIPSE
+    // --------------------------------------------------------
+    else if (shape == 6 || shape == 7) {
+        d = speakerFaceDiameters[j];
+
+        echo(str("  Cutout Ø (nominal mm): ", round(d)));
+        echo(str("  Bounding box (mm): ", round(d), " x ", round(d)));
+        echo(str("  Corner Ø (equiv mm): ", round(diag(d, d))));
+    }
+}
     echo("--------------------------------------------------");
 }

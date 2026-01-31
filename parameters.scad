@@ -105,7 +105,7 @@ driverParams = [
 speakerFaceDiameters = [
     2 * IN,         // Tweeter overall outside diameter
     79,             // Midrange overall outside diameter 
-    93.7      // Woofer overall outside diameter
+    93.7            // Woofer overall outside diameter
 ];
 
 // Tweeter, Midrange, Woofer
