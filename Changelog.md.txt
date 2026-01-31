@@ -1,5 +1,33 @@
 # Changelog
 
+## [0.1.2] - 2026-01-31
+### Added
+- New export mode structure:
+  - 0 = Full assembly
+  - 1 = Box only
+  - 2 = Back panel only
+  - 3 = Baffle only
+  - 4 = Grill only
+  - 5 = Small parts
+  - 6 = Fit test
+- Dedicated grill-only export mode for clean printing
+- Centralized small-parts export mode (caps, plugs, keys, etc.)
+- Honeycomb-style hex grill pattern with correct hex nesting
+
+### Changed
+- Reworked grill core pattern logic to support true nested hex layout
+- Improved grill pattern parameter usage (flat size + gap driven)
+- Refined grill positioning logic relative to baffle front face
+- Improved explode-view behavior for grill, caps, and baffle interaction
+- Cleaned up export routing logic for better maintainability
+
+### Fixed
+- Hex pattern appearing as simple rows instead of nested honeycomb
+- Misalignment between hex orientation and grid spacing
+- Grill magnet caps not visually separating correctly in explode view
+- Confusing overlap between grill and small-parts export modes
+
+
 ## [0.1.1] - 2026-01-26
 - corrected key position
 - made glue-on magnet caps for the grill

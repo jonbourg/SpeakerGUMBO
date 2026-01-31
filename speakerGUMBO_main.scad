@@ -4,10 +4,11 @@
 //
 // Speaker GUMBO v0.1.1 - 2026-01-26
 // Added slot port support and bracing patterns
-version = "0.1.1";
-echo("Speaker GUMBO version 0.1.0");
+version = "0.1.2";
+echo("Speaker GUMBO version 0.1.2");
 
-export_mode = 0;           // 0=Full, 1=Box, 2=Back panel, 3=Baffle, 4=Small Parts, 5=Driver Fit Test
+// 0=Full, 1=Box, 2=Back panel, 3=Baffle, 4=Grill, 5=Small Parts, 6=Driver Fit Test
+export_mode = 0;           
 explodeMode = true;
 explodeDistance = 30;      // mm — consider making dynamic: max(outerH, outerD, outerW) * 0.4 later
 
@@ -244,23 +245,38 @@ if (export_mode == 0) {
 // EXPORT MODES (single parts)
 // ────────────────────────────────────────────────
 else if (export_mode == 1) {
+    // BOX ONLY
     speaker_box();
 }
+
 else if (export_mode == 2) {
+    // BACK PANEL ONLY
     if (makeBackPanel)
         back_panel(box_if);
 }
+
 else if (export_mode == 3) {
+    // BAFFLE ONLY
     baffle_full(coreW, coreH, THK, outerW, outerH,
                 baffleSlotPosX, baffleSlotPosZ,
                 baffleKeyPosX,  baffleKeyPosZ);
 }
+
 else if (export_mode == 4) {
-    // Small Parts Only
+    grill_panel_flat(outerW, outerH, coreW, coreH, baffleCornerR);
+    // Uncomment for visualization only:
+    // grill_installed_caps(outerW, outerH);
+}
+
+
+else if (export_mode == 5) {
+    // SMALL PARTS ONLY
     export_small_parts();
 }
-else if (export_mode == 5) {
-    echo("EXPORT MODE 5: Driver fit-test puck for index ", fitTestDriverIndex);
+
+else if (export_mode == 6) {
+    // FIT TEST
+    echo("EXPORT MODE 6: Driver fit-test puck for index ", fitTestDriverIndex);
     driver_fit_test_puck(fitTestDriverIndex);
 }
 

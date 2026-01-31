@@ -254,18 +254,18 @@ grill_corner_radius_front = 10.0;
 // ────────────────────────────────────────────────
 // GRILL CORE PATTERN SELECTOR
 // ────────────────────────────────────────────────
-// 0 = Hex
+// 0 = Honeycomb
 // 1 = Waffle (rotated square)
 // 2 = Bars (future)
 // 3 = Perforated (future)
 // ────────────────────────────────────────────────
-grill_core_pattern = 3;
+grill_core_pattern = 0;
 
 
 // Hex pattern
 grill_hex_edge_margin = 7.0;  
-grill_pattern_hex_flat = 10.0;
-grill_pattern_hex_gap  = 4.0;
+grill_pattern_hex_flat = 8.0;
+grill_pattern_hex_gap  = 1.0;
 
 // Waffle pattern
 grill_waffle_pitch = 8;   // distance between holes

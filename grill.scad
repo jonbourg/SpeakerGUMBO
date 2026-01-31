@@ -30,24 +30,59 @@ module grill_panel_2d(outer_w, outer_h, core_w, core_h, corner_r) {
     innerW = gW - 2 * grill_hex_edge_margin;
     innerH = gH - 2 * grill_hex_edge_margin;
 
-
-    // Fill control — 1.0 = hexes touch mask edge, <1.0 = intentional inset
-    hex_fill_ratio = 2.0;   // very close to edge, slight safety
-    // hex_fill_ratio = 1.0;  // max fill — may clip slightly on edges
-
-    hex_flat = min(innerW, innerH) * hex_fill_ratio;
-
     difference() {
         rounded_rect_2d(gW, gH, grill_corner_radius_front);
 
         intersection() {
             grill_core_pattern_2d(innerW, innerH);
-            // Use small or zero radius when border is zero
             let(effective_r = (grill_border_w < 0.5) ? 0 : corner_r)
                 rounded_rect_2d(innerW, innerH, effective_r);
         }
     }
 }
+
+
+// ────────────────────────────────────────────────
+// HONEYCOMB PATTERN (2D) — SUBTRACTIVE (PRINT SAFE)
+// Generates a honeycomb
+// ────────────────────────────────────────────────
+module grill_hex_pattern_honeycomb(w, h) {
+    hole_flat = grill_pattern_hex_flat;
+    wall      = grill_pattern_hex_gap;
+    pitch     = hole_flat + wall;
+
+    // ── Flat-top layout ─────────────────────────────
+    x_step    = pitch;                      // horizontal spacing same row
+    y_step    = pitch * sqrt(3) / 2;       // vertical spacing
+    x_offset  = pitch / 2;                  // offset for odd rows
+
+    cols = ceil(w / x_step) + 4;   // generous overshoot
+    rows = ceil(h / y_step) + 4;
+
+    for (row = [-rows:rows]) {
+        y = row * y_step - h/2;   // better centering
+        x_shift = (row % 2 != 0) ? x_offset : 0;
+        for (col = [-cols:cols]) {
+            x = col * x_step + x_shift - w/2;
+            translate([x, y])
+                hex_hole_2d(hole_flat);
+        }
+    }
+}
+
+
+
+module hex_hole_2d(flat_d) {
+    // Pointy-top version - starts at top point
+    R = flat_d / 2;   // now R = distance center → flat center
+    polygon(points = [
+        for (i = [0:5])
+            let(angle = 30 + 60*i)   // rotate 30°
+                [ R * cos(angle), R * sin(angle) ]
+    ]);
+}
+
+
 
 // ────────────────────────────────────────────────
 // WAFFLE PATTERN (2D) — SUBTRACTIVE (PRINT SAFE)
@@ -219,7 +254,7 @@ module grill_installed_caps(outer_w, outer_h) {
 module grill_core_pattern_2d(w, h) {
 
     if (grill_core_pattern == 0) {
-        hex_pattern_2d(w, h);
+        grill_hex_pattern_honeycomb(w, h);
 
     } else if (grill_core_pattern == 1) {
         waffle_pattern_2d(w, h);
