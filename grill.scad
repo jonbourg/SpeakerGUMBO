@@ -41,13 +41,79 @@ module grill_panel_2d(outer_w, outer_h, core_w, core_h, corner_r) {
         rounded_rect_2d(gW, gH, grill_corner_radius_front);
 
         intersection() {
-            hex_pattern_2d(innerW, innerH);
+            grill_core_pattern_2d(innerW, innerH);
             // Use small or zero radius when border is zero
             let(effective_r = (grill_border_w < 0.5) ? 0 : corner_r)
                 rounded_rect_2d(innerW, innerH, effective_r);
         }
     }
 }
+
+// ────────────────────────────────────────────────
+// WAFFLE PATTERN (2D) — SUBTRACTIVE (PRINT SAFE)
+// Generates diamond-shaped HOLES
+// ────────────────────────────────────────────────
+module waffle_pattern_2d(w, h) {
+
+    // ── USER TUNABLES ───────────────────────────
+    waffle_pitch = grill_waffle_pitch;   // center-to-center spacing
+    waffle_gap   = grill_waffle_gap;     // hole size control
+    waffle_angle = 45;
+    // ────────────────────────────────────────────
+
+    span = sqrt(w*w + h*h) + waffle_pitch * 2;
+
+    rotate(waffle_angle)
+    for (x = [-span : waffle_pitch : span])
+        for (y = [-span : waffle_pitch : span])
+            translate([x, y])
+                square([waffle_gap, waffle_gap], center = true);
+}
+
+
+// ────────────────────────────────────────────────
+// BAR PATTERN (2D) — SUBTRACTIVE (PRINT SAFE)
+// Generates slots between solid bars
+// ────────────────────────────────────────────────
+module bars_pattern_2d(w, h) {
+
+    // ── USER TUNABLES ───────────────────────────
+    bar_pitch = grill_bar_pitch;   // center-to-center spacing
+    bar_gap   = grill_bar_gap;     // slot width (cut)
+    bar_angle = grill_bar_angle;   // degrees (0 = vertical)
+    // ────────────────────────────────────────────
+
+    span = sqrt(w*w + h*h) + bar_pitch * 2;
+
+    rotate(bar_angle)
+    for (x = [-span : bar_pitch : span]) {
+        translate([x, 0])
+            square([bar_gap, span * 2], center = true);
+    }
+}
+
+
+// ────────────────────────────────────────────────
+// PERFORATED PATTERN (2D) — SUBTRACTIVE (PRINT SAFE)
+// Generates round holes in a uniform grid
+// ────────────────────────────────────────────────
+module perforated_pattern_2d(w, h) {
+
+    // ── USER TUNABLES ───────────────────────────
+    perf_pitch = grill_perf_pitch;   // center-to-center spacing
+    perf_dia   = grill_perf_dia;     // hole diameter
+    perf_angle = grill_perf_angle;   // degrees (optional rotation)
+    // ────────────────────────────────────────────
+
+    span = sqrt(w*w + h*h) + perf_pitch * 2;
+
+    rotate(perf_angle)
+    for (x = [-span : perf_pitch : span])
+        for (y = [-span : perf_pitch : span])
+            translate([x, y])
+                circle(d = perf_dia, $fn = 32);
+}
+
 
 // ────────────────────────────────────────────────
 // MAGNET BOSSES — Solid (attached to grill back)
@@ -145,3 +211,43 @@ module grill_installed_caps(outer_w, outer_h) {
         }
     }
 }
+
+// ────────────────────────────────────────────────
+// GRILL CORE ROUTER (2D)
+// Centralized pattern selection
+// ────────────────────────────────────────────────
+module grill_core_pattern_2d(w, h) {
+
+    if (grill_core_pattern == 0) {
+        hex_pattern_2d(w, h);
+
+    } else if (grill_core_pattern == 1) {
+        waffle_pattern_2d(w, h);
+
+    } else if (grill_core_pattern == 2) {
+        bars_pattern_2d(w, h);   // placeholder
+
+    } else if (grill_core_pattern == 3) {
+        perforated_pattern_2d(w, h);   // placeholder
+
+    } else {
+        // Safe fallback: solid (debug friendly)
+        square([w, h], center = true);
+    }
+}
+
+
+// ────────────────────────────────────────────────
+// GRILL MAGNET CAPS — ARRAY (FLIPPED FOR PRINTING)
+// ────────────────────────────────────────────────
+module grill_mag_caps_array(count = undef)
+{
+    eff_count = is_undef(count) ? 1 : count;
+    spacing = grill_boss_d + 6;
+
+    for (i = [0 : eff_count - 1])
+        translate([i * spacing, 0, grill_cap_thk+(chamfer_depth*2)])
+            rotate([180, 0, 0])   // ← THIS is the flip
+                grill_mag_retention_cap();
+}
+

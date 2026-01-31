@@ -251,17 +251,36 @@ grill_corner_radius_front = 10.0;
 
 //corner_r = 0;
 
+// ────────────────────────────────────────────────
+// GRILL CORE PATTERN SELECTOR
+// ────────────────────────────────────────────────
+// 0 = Hex
+// 1 = Waffle (rotated square)
+// 2 = Bars (future)
+// 3 = Perforated (future)
+// ────────────────────────────────────────────────
+grill_core_pattern = 3;
+
+
 // Hex pattern
 grill_hex_edge_margin = 7.0;  
 grill_pattern_hex_flat = 10.0;
 grill_pattern_hex_gap  = 4.0;
 
-/*
-// Example baffle size (standalone test)
-outerW = 320;
-outerH = 520;
-// baffleCornerR = 10;
-*/
+// Waffle pattern
+grill_waffle_pitch = 8;   // distance between holes
+grill_waffle_gap   = 5.5;  // size of diamond opening
+
+// Bar pattern
+grill_bar_pitch = 9;     // distance between bars
+grill_bar_gap   = 4.5;   // slot width
+grill_bar_angle = 30;     // 0 = vertical, 90 = horizontal
+
+// Perforated pattern
+grill_perf_pitch = 8.5;   // spacing between holes
+grill_perf_dia   = 5.0;   // hole diameter
+grill_perf_angle = 0;     // rotation (usually 0)
+
 
 // Magnet physical size + fit clearance
 grill_mag_dia   = 6.0;

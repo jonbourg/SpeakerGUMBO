@@ -7,6 +7,17 @@ echo("=== USING BAFFLE.SC AD ===");
 // Helper Function for Grill Magnets
 function clampF(lo, hi, v) = min(max(v, lo), hi);
 
+function grill_effective_plug_depth(THK) =
+    is_undef(grill_compute_plug_depth)
+        ? (
+            (is_undef(grill_compute_mag_depth)
+                ? grill_mag_thk + grill_mag_clear + 0.5
+                : grill_compute_mag_depth())
+          + grill_skin_min
+          + 0.5
+        )
+        : grill_compute_plug_depth(THK); 
+
 
 // ===================== MODULES =====================
 
@@ -505,6 +516,7 @@ module baffle_full(coreW, coreH, THK, outerW, outerH, baffleSlotPosX, baffleSlot
     }
 }
 
+
 // Module to Make Plugs to fill in the back of the grill magnet holes.
 module grill_magnet_plug(plug_depth)
 {
@@ -528,13 +540,17 @@ module grill_magnet_plug(plug_depth)
     }
 }
 
-module grill_magnet_plugs_array(plug_depth, count = grill_mag_count)
+module grill_magnet_plugs_array(plug_depth, count = undef)
 {
+    // Fallback if count not provided
+    eff_count = is_undef(count) ? 1 : count;
+
     spacing = grill_mag_dia + 6;
 
-    for (i = [0 : count-1])
+    for (i = [0 : eff_count - 1])
         translate([i * spacing, 0, 0])
             grill_magnet_plug(plug_depth);
 }
+
 
 

@@ -7,7 +7,7 @@
 version = "0.1.1";
 echo("Speaker GUMBO version 0.1.0");
 
-export_mode = 0;           // 0=Full, 1=Box, 2=Back panel, 3=Baffle, 4=Slot Key, 5=Driver Fit Test
+export_mode = 0;           // 0=Full, 1=Box, 2=Back panel, 3=Baffle, 4=Small Parts, 5=Driver Fit Test
 explodeMode = true;
 explodeDistance = 30;      // mm — consider making dynamic: max(outerH, outerD, outerW) * 0.4 later
 
@@ -54,36 +54,11 @@ boxIntHeight = is_undef(boxIntHeight_calc) ? 120 : max(50, boxIntHeight_calc);
 boxIntWidth  = is_undef(boxIntWidth_calc)  ? 100 : max(50, boxIntWidth_calc);
 boxIntDepth  = is_undef(boxIntDepth_calc)  ? 110 : max(50, boxIntDepth_calc);
 
-// Now compute outer dimensions
-//outerW = boxIntWidth  + 2 * boxThickness;
-//outerD = boxIntDepth  + 2 * boxThickness;
-//outerH = boxIntHeight + 2 * boxThickness;
-
 // Lock in outer dimensions with fallback
 outerW = is_undef(boxIntWidth) ? 130 : max(100, boxIntWidth  + 2 * boxThickness);
 outerD = is_undef(boxIntDepth) ? 140 : max(100, boxIntDepth + 2 * boxThickness);
 outerH = is_undef(boxIntHeight) ? 160 : max(100, boxIntHeight + 2 * boxThickness);
 
-/*
-// Confirm final values
-echo("FINAL OUTER DIMS (after all clamps):");
-echo("outerW =", outerW);
-echo("outerD =", outerD);
-echo("outerH =", outerH);
-/*
-
-/*
-// Debug prints — keep these
-echo("DEBUG VOLUME CALC:");
-echo("Vb =", Vb, "Vb_safe =", Vb_safe);
-echo("baseLen_raw =", baseLen_raw, "→ baseLen =", baseLen);
-echo("ratio_raw =", ratio_raw, "→ ratioNorm =", ratioNorm);
-echo("boxIntHeight_calc (before clamp) =", boxIntHeight_calc);
-echo("boxIntWidth_calc  (before clamp) =", boxIntWidth_calc);
-echo("boxIntDepth_calc  (before clamp) =", boxIntDepth_calc);
-echo("boxInt (H W D) after clamp =", boxIntHeight, boxIntWidth, boxIntDepth);
-echo("outer (W D H) =", outerW, outerD, outerH);
-*/
 
 // ────────────────────────────────────────────────
 // BACK PANEL DERIVED VALUES
@@ -159,6 +134,33 @@ baffleKeyPosZ  = -outerH/2 + pocketMargin;
 
 edgeR = (baffleEdgeStyle == 2) ? clampF(baffleEdgeSize, 0, 8) : 0;
 THK = (edgeR > baffleThickness/2) ? (2*edgeR + 1) : baffleThickness;
+
+// ────────────────────────────────────────────────
+// SMALL PARTS EXPORT
+// ────────────────────────────────────────────────
+module export_small_parts() {
+
+    spacing = 15;   // layout spacing
+    
+    // SLOT / KEY
+    translate([-10, 1 * spacing, 0])
+        slot();          // or whatever your key module is
+    
+    translate([10, 1 * spacing, 0])
+        key();     // if separate
+    
+    // GRILL MAGNET CAPS
+    translate([-40, 2 * spacing, 0])
+        grill_mag_caps_array(6);
+    
+    // BAFFLE MAGNET PLUGS
+    translate([-30, 3 * spacing, 0])
+        grill_magnet_plugs_array(
+            grill_compute_plug_depth(baffleThickness),
+            6
+        );
+}
+
 
 // ────────────────────────────────────────────────
 // MAIN ASSEMBLY (export_mode == 0)
@@ -254,13 +256,8 @@ else if (export_mode == 3) {
                 baffleKeyPosX,  baffleKeyPosZ);
 }
 else if (export_mode == 4) {
-    // Slot + Key + magnet plugs — laid out for print bed
-    translate([0, -10, 0]) slot();
-    translate([0,  10, 0]) key();
-    translate([-40, 20, 0])
-        grill_magnet_plugs_array(
-            grill_compute_plug_depth(baffleThickness)
-        );
+    // Small Parts Only
+    export_small_parts();
 }
 else if (export_mode == 5) {
     echo("EXPORT MODE 5: Driver fit-test puck for index ", fitTestDriverIndex);
