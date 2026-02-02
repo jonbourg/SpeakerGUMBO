@@ -27,7 +27,7 @@
 // GLOBAL DISPLAY / DEBUG
 // ======================================================================
 
-$fn = 64;                  // Resolution - low for working, high for 3D printing.
+$fn = 128;                  // Resolution - low for working, high for 3D printing.
 showSpecs       = true;    // Recommend leaving this to true all the time
 showDebug       = false;   // driver center debug cylinders
 showDriverFaces = false;   // driver face overlays on baffle
@@ -259,7 +259,7 @@ grill_corner_radius_front = 10.0;
 // 2 = Bars (future)
 // 3 = Perforated (future)
 // ────────────────────────────────────────────────
-grill_core_pattern = 0;
+grill_core_pattern = 3;
 
 
 // Hex pattern
@@ -310,28 +310,6 @@ grill_cap_lip      = 0.8;
 grill_dimple_dia   = 3.0;
 grill_dimple_depth = 0.5;
 
-/*
-// ============================================================
-// GRILL — GEOMETRY & PLACEMENT
-// ============================================================
-grill_enable          = true;     // Set false to hide grill completely in all views
-
-grill_outer_inset     = 18.0;   // Try 8–15 mm; 0 = full size, 20 = matches old core-based size
-grill_corner_radius_front = 10.0;   // ← key control: try 6–12 mm to match baffle feel
-grill_clearance       = 1.0;      // mm smaller per side than baffle's flat core area
-grill_border_w        = 1.0;      // visible solid border width around hex pattern
-grill_thk             = 3.4;      // total grill thickness (before rounding)
-grill_edge_r          = 1.0;      // radius of minkowski rounding on all edges (front/back/sides); set 0 for sharp
-grill_standoff        = 0.6;      // mm — nominal gap between baffle front face and grill back face
-grill_corner_adjust   = grill_edge_r;  // how much to reduce corner radius to compensate for edge rounding
-
-
-// ============================================================
-// GRILL PATTERN — HEXAGONAL ACOUSTIC OPENINGS
-// ============================================================
-grill_pattern_hex_flat        = 6.0;      // flat-to-flat distance of each hex (core size before gap)
-grill_pattern_hex_gap         = 1.2;      // minimum wall thickness between hexes (material between openings)
-*/
 
 
 // ======================================================================
@@ -380,9 +358,9 @@ multiPortOffsetZ   = -10;      // center of group in Z (negative = down, positiv
 // ======================================================================
 // terminalType:
 // 0 = none, 1 = single wire, 2 = dual wire, 3 = round cup,
-// 4 = rectangular cup, 5 = legacy pair, 6 = NL2, 7 = binding posts,
+// 4 = rectangular cup, 5 = dual banana posts, 6 = NL2, 7 = binding posts,
 // 8 = spring clip
-terminalType = 2;   // default: dual wire
+terminalType = 5;   // default: dual wire
 
 wireDiameter    = 6.35;
 dualWireSpacing = 20;
@@ -394,7 +372,14 @@ terminalHeight = 40;
 
 terminalPairWidth = 40;
 
+terminalScrewHoleDia = 2.8;     // M3 self tapping screws
+terminalScrewInset   = 4.0;     // default edge offset
+terminalScrewDepthFrac = 0.75;  // 75% of back panel thickness
+
+
 nl2HoleDiameter = 24;
+nl2ScrewCount    = 4;      // try 2 first
+nl2RotationDeg   = 45;
 
 bindingPostHoleDiameter = 8;
 bindingPostSpacingX     = 19;
@@ -406,7 +391,7 @@ springClipHeight = 35;
 
 // Terminal offsets (on back panel)
 terminalOffsetX = 0;
-terminalOffsetZ = -40;  
+terminalOffsetZ = 0;  
 
 
 // ======================================================================

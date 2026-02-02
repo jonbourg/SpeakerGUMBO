@@ -146,7 +146,7 @@ module perforated_pattern_2d(w, h) {
     for (x = [-span : perf_pitch : span])
         for (y = [-span : perf_pitch : span])
             translate([x, y])
-                circle(d = perf_dia, $fn = 32);
+                circle(d = perf_dia);
 }
 
 
@@ -158,7 +158,7 @@ module grill_bosses(outer_w, outer_h) {
     for (p = pos) {
         translate([p[0], -grill_boss_h, p[1]])
             rotate([-90, 0, 0])
-                cylinder(d = grill_boss_d, h = grill_boss_h, center = false, $fn = 32);
+                cylinder(d = grill_boss_d, h = grill_boss_h, center = false);
     }
 }
 
@@ -173,7 +173,7 @@ module grill_magnet_cavities(outer_w, outer_h) {
     for (p = pos) {
         translate([p[0], -grill_boss_h + cavity_depth / 2 - 0.01, p[1]]) {
             rotate([-90, 0, 0])
-                cylinder(d = mag_d, h = cavity_depth + 0.2, center = true, $fn = 48);
+                cylinder(d = mag_d, h = cavity_depth + 0.2, center = true);
         }
     }
 }
@@ -190,21 +190,20 @@ module grill_mag_retention_cap() {
 
     difference() {
         union() {
-            cylinder(d = cap_od, h = cap_thk + pocket_h - chamfer_depth, $fn = 48);
+            cylinder(d = cap_od, h = cap_thk + pocket_h - chamfer_depth);
 
             // Chamfer at HIGH Z / REAR (exposed side after rotation)
             translate([0, 0, (cap_thk + pocket_h) - chamfer_depth])
                 cylinder(  // # for debug highlight (remove when done)
                     d1 = cap_od,                      // wide at base (inside cap)
                     d2 = cap_od - 2 * chamfer_width,  // narrow at very rear (exposed face)
-                    h = chamfer_depth,
-                    $fn = 48
+                    h = chamfer_depth
                 );
         }
 
         // Pocket from LOW Z / FRONT (against grill / boss)
         translate([0, 0, -0.01])  // cut from bottom
-            cylinder(d = pocket_d, h = pocket_h + 0.02, $fn = 48);
+            cylinder(d = pocket_d, h = pocket_h + 0.02);
         
     }
 }

@@ -2,6 +2,33 @@
 
 # G.U.M.B.O. Changelog
 
+## v0.1.4 – Back Panel Terminals & Mounting Improvements
+
+### Added
+- Panel-local terminal geometry helpers to ensure consistent, robust placement
+- Support for mounting screw holes on applicable terminal types:
+  - Rectangular / square terminal cups
+  - Spring clip terminals
+  - NL2 Speakon connectors (2- or 4-screw bolt circle, parameterized)
+- Configurable screw count and rotation for Speakon connectors
+- Blind mounting screw holes with depth set to 75% of total back panel thickness (panel + tongue)
+
+### Changed
+- Refactored terminal cutouts to use panel-local coordinates for correctness in flush and explode views
+- Clarified legacy terminal naming:
+  - Renamed legacy terminal pair to **dual banana posts**
+- Improved robustness of back panel terminal logic after rear panel geometry refactor
+
+### Fixed
+- Restored missing terminal cutouts lost during earlier back panel geometry changes
+- Corrected screw hole placement to the exterior face of the back panel
+- Prevented terminal mounting screws from unintentionally passing fully through the panel
+
+### Notes
+- Terminal types that mount via threaded shafts (banana/binding posts) intentionally do not use mounting screws
+- Terminal subsystem is now considered stable and complete
+
+
 ## Version 0.1.3
 
 ### Driver Fit Test Improvements
