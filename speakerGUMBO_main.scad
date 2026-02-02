@@ -4,8 +4,8 @@
 //
 // Speaker GUMBO v0.1.1 - 2026-01-26
 // Added slot port support and bracing patterns
-version = "0.1.3";
-echo("Speaker GUMBO version 0.1.3");
+version = "0.1.4";
+echo("Speaker GUMBO version 0.1.4");
 
 // 0=Full, 1=Box, 2=Back panel, 3=Baffle, 4=Grill, 5=Small Parts, 6=Driver Fit Test
 export_mode = 0;           
