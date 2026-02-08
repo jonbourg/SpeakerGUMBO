@@ -4,10 +4,10 @@
 //
 // Speaker GUMBO v0.1.1 - 2026-01-26
 // Added slot port support and bracing patterns
-version = "0.1.4";
-echo("Speaker GUMBO version 0.1.4");
+version = "0.1.5";
+echo("Speaker GUMBO version 0.1.5");
 
-// 0=Full, 1=Box, 2=Back panel, 3=Baffle, 4=Grill, 5=Small Parts, 6=Driver Fit Test
+// 0=Full, 1=Box, 2=Back panel, 3=Baffle, 4=Grill, 5=Small Parts, 6=Driver Fit Test, 7=Gaskets
 export_mode = 0;           
 explodeMode = true;
 explodeDistance = 30;      // mm — consider making dynamic: max(outerH, outerD, outerW) * 0.4 later
@@ -22,6 +22,8 @@ include <grill.scad>
 include <slot_key.scad>
 include <back_panel.scad>
 include <driver_fit_test.scad>
+include <gaskets.scad>
+
 
 // ────────────────────────────────────────────────
 // VOLUME & DIMENSION CALCULATIONS
@@ -279,6 +281,13 @@ else if (export_mode == 6) {
     echo("EXPORT MODE 6: Driver fit-test puck for index ", fitTestDriverIndex);
     driver_fit_test_puck(fitTestDriverIndex);
 }
+
+else if (export_mode == 7 && enableGaskets) {
+    echo("EXPORT MODE 7 ACTIVE");
+    gaskets_export();
+}
+
+
 
 // ────────────────────────────────────────────────
 // FINAL SPECS SUMMARY (shown in full assembly or when showSpecs=true)

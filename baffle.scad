@@ -1,11 +1,13 @@
 // baffle.scad - corrected with parameter passing
-include <parameters.scad>
+
+include <utils.scad>
 include <drivers.scad>
+
 
 echo("=== USING BAFFLE.SC AD ===");
 
 // Helper Function for Grill Magnets
-function clampF(lo, hi, v) = min(max(v, lo), hi);
+// function clampF(lo, hi, v) = min(max(v, lo), hi);
 
 function grill_effective_plug_depth(THK) =
     is_undef(grill_compute_plug_depth)
@@ -138,38 +140,6 @@ module baffle_frame_solid(coreW, coreH, THK, outerW, outerH, baffleSlotPosX, baf
     }
 }
 
-// 2D cutout profile for the *through* opening
-module through_cutout_2d(j, shape) {
-    // Prefer driver cutout diameter for acoustic hole size
-    d = driverParams[j][0];
-
-    if (shape == 0) {
-        circle(d = d);
-    }
-    else if (shape == 4) {
-        // Shape 4 = clipped circle (4 flats)
-        // Use the same flat ratio you used in drivers.scad (adjust if you have a standard)
-        // This makes a circle with 4 flats by intersecting with a square.
-        flat = 0.86;  // 0.80-0.92 typical; 0.86 gives visible flats without over-clipping
-        intersection() {
-            circle(d = d);
-            square([d*flat, d*flat], center=true);
-        }
-    }
-    else {
-        // Fallback to round unless you want other shapes as through cutouts too
-        circle(d = d);
-    }
-}
-
-// Shape 4: clipped circle (4 flats)
-module shape4_2d(d) {
-    flat = 0.86;  // same value used elsewhere
-    intersection() {
-        circle(d = d);
-        square([d*flat, d*flat], center=true);
-    }
-}
 
 
 module baffle_driver_features(THK) {
@@ -343,7 +313,7 @@ module baffle_driver_features(THK) {
                     // SHAPE 4 — clipped circle (4 flats)
                     else if (shape == 4) {
                         linear_extrude(height = recessDepth + 0.5, center=true)
-                            shape4_2d(faceDia);
+                            driver_cutout_2d(j, 0);
                     }
 
                     // SHAPE 5 — top/bottom clipped circle

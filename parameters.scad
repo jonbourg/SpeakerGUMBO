@@ -27,7 +27,7 @@
 // GLOBAL DISPLAY / DEBUG
 // ======================================================================
 
-$fn = 128;                  // Resolution - low for working, high for 3D printing.
+$fn = 64;                  // Resolution - low for working, high for 3D printing.
 showSpecs       = true;    // Recommend leaving this to true all the time
 showDebug       = false;   // driver center debug cylinders
 showDriverFaces = false;   // driver face overlays on baffle
@@ -61,7 +61,10 @@ function clampF(x, xmin, xmax) =
 // ======================================================================
 // BOX GEOMETRY 
 // ======================================================================
-boxThickness   = 12;    // wall thickness (mm)
+// NOTE:
+// Values below 8mm box thickness and 3mm edge radius will cause panel flex, resonance,
+// weak corners, or poor print reliability in speaker enclosures.
+boxThickness   = 12;    
 edge_round_radius      = 5;    
 round_horizontal_edges = true;
 frontTrim              = edge_round_radius; 
@@ -234,6 +237,32 @@ tabPocketDepth = 3.0;
 tabPocketClearance = 0.25;
 
 
+/////////////////////////////
+// GASKET PARAMETERS
+/////////////////////////////
+
+enableGaskets = true;
+
+// Driver gaskets
+enableDriverGaskets = true;
+
+gasket_thk        = 1.5;   // mm
+gasket_width      = 4.0;
+gasket_clearance  = 0.3;
+gasket_hole_clear = 0.4;
+
+// Sealing bead
+gasket_bead_enable = true;
+gasket_bead_h      = 0.6;
+gasket_bead_w      = 1.2;
+gasket_bead_offset = 0.0;
+
+// Print layout
+gasket_spacing = 6;
+
+gasket_flange_margin = 6;  // mm beyond face diameter (safe default)
+
+
 // ────────────────────────────────────────────────
 // GRILL PARAMETERS 
 // ────────────────────────────────────────────────
@@ -360,7 +389,7 @@ multiPortOffsetZ   = -10;      // center of group in Z (negative = down, positiv
 // 0 = none, 1 = single wire, 2 = dual wire, 3 = round cup,
 // 4 = rectangular cup, 5 = dual banana posts, 6 = NL2, 7 = binding posts,
 // 8 = spring clip
-terminalType = 5;   // default: dual wire
+terminalType = 2;   // default: dual wire
 
 wireDiameter    = 6.35;
 dualWireSpacing = 20;
@@ -391,7 +420,7 @@ springClipHeight = 35;
 
 // Terminal offsets (on back panel)
 terminalOffsetX = 0;
-terminalOffsetZ = 0;  
+terminalOffsetZ = -40;  
 
 
 // ======================================================================

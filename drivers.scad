@@ -1,8 +1,10 @@
 // drivers.scad
 // Pure library file: ONLY function and module definitions
-// No top-level variables, assignments, or echoes here!
 // All computations (margin, enabledDriverIdx, zPositions, etc.) 
 // are done in the main file after includes.
+
+include <utils.scad>
+
 
 // =============================================
 // HELPER FUNCTIONS (pure – no side effects)
@@ -70,6 +72,71 @@ function z_for_driver(i) =
                               wooferZ_offset
     )
     (is_undef(z_raw) ? undef : z_raw + z_offset);
+  
+    
+// ======================================================================
+// DRIVER DERIVED VALUES FOR GASKETS
+// ======================================================================
+
+function max_driver_diameter() =
+    max([
+        for (j = [0 : len(driverParams) - 1])
+            driverParams[j][3]
+                ? driver_bounding_diameter(j)
+                : 0
+    ]);
+
+// ============================================================
+// DRIVER CUTOUT (2D) — canonical driver outline
+// Used by baffle, gaskets, fit tests
+// ============================================================
+module driver_cutout_2d(j, clearance = 0) {
+
+    shape = driverFaceShape[j];
+
+    faceDia = speakerFaceDiameters[j];
+    rectW   = driverRectSizes[j][0];
+    rectH   = driverRectSizes[j][1];
+    clip    = driverClipDepth[j];
+
+    // clearance expands outward
+    faceDiaC = faceDia + 2*clearance;
+    rectWC   = rectW   + 2*clearance;
+    rectHC   = rectH   + 2*clearance;
+
+    if (shape == 0) {
+        circle(d = faceDiaC);
+    }
+    else if (shape == 1) {
+        square([faceDiaC, faceDiaC], center = true);
+    }
+    else if (shape == 2) {
+        r2 = driverCornerRadius[j] > 0 ? driverCornerRadius[j] : min(rectWC, rectHC) * 0.15;
+        offset(r = r2)
+            square([rectWC - 2*r2, rectHC - 2*r2], center = true);
+    }
+    else if (shape == 3) {
+        square([rectWC, rectHC], center = true);
+    }
+    else if (shape == 4) {
+        clipped_circle_2d(faceDiaC, clip);
+    }
+    else if (shape == 5) {
+        clipped_circle_tb_2d(faceDiaC, clip);
+    }
+    else if (shape == 6) {
+        squircle_2d(faceDiaC);
+    }
+    else if (shape == 7) {
+        rotate(45)
+            shape7_2d(faceDiaC, faceDiaC, driverAdjustCornerR[j], driverAdjustCurvature[j]);
+    }
+    else {
+        circle(d = faceDiaC);
+    }
+}
+
+
 
 // =============================================
 // DRIVER CUTOUTS MODULE
@@ -237,7 +304,7 @@ module driver_debug_cylinders() {
 // ============================================================
 // DRIVER FACE POCKET (2D)
 // ============================================================
-module face_shape_pocket(
+/* module face_shape_pocket(
     faceShape,
     driver_outer_dia,
     clip_depth
@@ -279,7 +346,14 @@ module face_shape_pocket(
 
     else
         circle(d = driver_outer_dia);
+} */
+
+module face_shape_pocket(faceShape, driver_outer_dia, clip_depth) {
+    // Deprecated signature retained for compatibility.
+    // Prefer driver_cutout_2d(j, clearance) for new code.
+    circle(d = driver_outer_dia); // fallback (safe)
 }
+
 
 // ============================================================
 // SCREW HOLE PATTERN
@@ -318,9 +392,11 @@ module flush_fit_test_puck(
     total_thickness = flush_depth + under_flange_thk;
 
     // Use override if provided, else old calculation
-    disk_diameter = is_undef(puck_dia_override) 
-        ? 2 * R_face + 2 * disk_margin 
+    disk_diameter =
+    is_undef(puck_dia_override)
+        ? (driver_outer_dia + 2*12)   // 12mm margin default
         : puck_dia_override;
+
 
     difference() {
         cylinder(h = total_thickness, d = disk_diameter);

@@ -28,6 +28,19 @@ function grill_compute_plug_depth(thk) =
     min(pd, thk * 0.6);  // never more than 60% of baffle thickness
        
 function clamp_min(v, minv) = (v < minv) ? minv : v;
+
+// Driver Bourding Diameter for Gaskets
+function driver_bounding_diameter(j) =
+    (driverFaceShape[j] == 0 ||
+     driverFaceShape[j] == 4 ||
+     driverFaceShape[j] == 5 ||
+     driverFaceShape[j] == 6 ||
+     driverFaceShape[j] == 7)
+        ? speakerFaceDiameters[j]
+        : diag(
+            driverRectSizes[j][0],
+            driverRectSizes[j][1]
+          );
  
         
     
