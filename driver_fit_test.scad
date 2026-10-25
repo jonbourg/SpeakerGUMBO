@@ -156,7 +156,8 @@ module driver_fit_test_puck(driver_idx = 2) {
         clip_depth,
         shape_fit_tolerance,
         cutout_fit_tolerance,
-        puck_dia  // dynamic size
+        puck_dia,
+        driver_idx
     );
 
     // Outer ring (bigger, farther out)

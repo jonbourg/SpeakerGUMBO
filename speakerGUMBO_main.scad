@@ -8,9 +8,9 @@ version = "0.1.5";
 echo("Speaker GUMBO version 0.1.5");
 
 // 0=Full, 1=Box, 2=Back panel, 3=Baffle, 4=Grill, 5=Small Parts, 6=Driver Fit Test, 7=Gaskets
-export_mode = 3;           
+export_mode = 7;           
 explodeMode = true;
-explodeDistance = 30;      // mm — consider making dynamic: max(outerH, outerD, outerW) * 0.4 later
+explodeDistance = 100;      // mm 
 
 include <parameters.scad>
 include <utils.scad>

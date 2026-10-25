@@ -360,7 +360,8 @@ module flush_fit_test_puck(
     clip_depth,
     shape_fit_tolerance,
     cutout_fit_tolerance,   // ← ADD COMMA HERE
-    puck_dia_override = undef  // ← now valid
+    puck_dia_override = undef,  // ← now valid
+    driver_idx = 0
 ) {
     total_thickness = flush_depth + under_flange_thk;
 
@@ -375,15 +376,11 @@ module flush_fit_test_puck(
         cylinder(h = total_thickness, d = disk_diameter);
         
         // Flush pocket
+        // Flush pocket: use the same driver face outline as the baffle
         translate([0, 0, total_thickness - flush_depth])
             linear_extrude(height = flush_depth + 0.01)
-                offset(delta = shape_fit_tolerance)
-                    face_shape_pocket(
-                        faceShape,
-                        driver_outer_dia,
-                        clip_depth
-                    );
-
+                driver_cutout_2d(driver_idx, shape_fit_tolerance);
+                
         // Basket cutout
         translate([0, 0, -0.01])
             cylinder(

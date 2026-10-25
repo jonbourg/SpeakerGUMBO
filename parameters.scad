@@ -30,7 +30,7 @@
 $fn = 64;                  // Resolution - low for working, high for 3D printing.
 showSpecs       = true;    // Recommend leaving this to true all the time
 showDebug       = true;   // driver center debug cylinders
-showDriverFaces = true;   // Preview-only driver face outlines; visible ONLY in export_mode = 3 (Baffle)
+showDriverFaces = false;   // Preview-only driver face outlines; visible ONLY in export_mode = 3 (Baffle)
 
 // Legacy setting retained for compatibility; overlays now sit 0.1 mm above baffle front.
 driverFaceOffset = 18.0;      // mm (not used by baffle overlay)
@@ -41,7 +41,7 @@ IN=25.4;  // for converting inches to mm
 // ======================================================================
 sealed = true;   // true = sealed, false = ported
 
-Vas = 10;     // Cubic feet * 28.3 to convert to cubic liters
+Vas = 3;     // Cubic feet * 28.3 to convert to cubic liters
 Qts = 0.77;
 Qtc = 0.9;
 
@@ -70,7 +70,7 @@ round_horizontal_edges = true;
 frontTrim              = edge_round_radius; 
 
 // Box geometry ratio's, use golden rule or your own
-boxHeightRatio = 3.0;
+boxHeightRatio = 1.5;
 boxWidthRatio  = 0.9;
 boxDepthRatio  = 1.0;
 
@@ -491,7 +491,7 @@ backScrewPilotDepth = 10;            // mm, depth into box material
 // ======================================================================
 // DRIVER FIT TEST PARAMETERS
 // ======================================================================
-fitTestDriverIndex = 2;   // 0=tweeter, 1=mid, 2=woofer
+fitTestDriverIndex = 1;   // 0=tweeter, 1=mid, 2=woofer
 
 underFlangeThickness = 2.4;
 

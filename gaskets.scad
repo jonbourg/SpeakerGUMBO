@@ -42,22 +42,18 @@ module gaskets_export() {
 
 module driver_gaskets_export() {
 
-    idx = 0;
-
     for (j = [0 : len(driverParams) - 1]) {
 
         if (driverParams[j][3]) {
 
             translate([
-                idx * (max_driver_diameter()
-                       + gasket_width * 2
-                       + gasket_spacing),
+                j * (max_driver_diameter()
+                     + gasket_width * 2
+                     + gasket_spacing),
                 0,
                 0
             ])
                 driver_gasket_single(j);
-
-            idx = idx + 1;
         }
     }
 }
