@@ -4,6 +4,26 @@
 
 ## [Unreleased]
 
+Fixed
+
+Corrected driver fit-test flange recesses to match the selected driver's actual face geometry, including clipped-circle profiles.
+
+Fixed gasket export positioning so enabled driver gaskets no longer overlap.
+
+Validated
+
+Confirmed correct fit-test geometry for tweeter, midrange, and woofer.
+
+Completed digital validation of all eight export modes (0–7).
+
+Verified corrected STL exports using Microsoft 3D Builder.
+
+Pending
+
+Physical print testing and dimensional fit verification.
+
+## [Unreleased]
+
 ### Added
 - Automatic vertical spacing for multiple speaker drivers, with a configurable `driverAutoGap` parameter.
 - G-005 warning for overlapping speaker drivers.
