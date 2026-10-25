@@ -8,7 +8,7 @@ version = "0.1.5";
 echo("Speaker GUMBO version 0.1.5");
 
 // 0=Full, 1=Box, 2=Back panel, 3=Baffle, 4=Grill, 5=Small Parts, 6=Driver Fit Test, 7=Gaskets
-export_mode = 0;           
+export_mode = 3;           
 explodeMode = true;
 explodeDistance = 30;      // mm — consider making dynamic: max(outerH, outerD, outerW) * 0.4 later
 
@@ -116,7 +116,46 @@ enabledFaceRadii = [for (k = [0:len(enabledDriverIdx)-1])
     let(j = enabledDriverIdx[k]) speakerFaceDiameters[j]/2
 ];
 
-zPositions = compute_z_positions_ordered(enabledFaceRadii, boxIntHeight);
+zPositions = compute_z_positions_ordered(enabledFaceRadii, boxIntHeight, driverAutoGap);
+
+// Warn instead of silently distorting a layout that cannot fit.
+stackHeight = driver_stack_height(enabledFaceRadii, driverAutoGap);
+assert(driverAutoGap >= 0, "driverAutoGap must be nonnegative");
+if (stackHeight + 2*driverEdgeMin > boxIntHeight)
+    echo(str("WARNING: Driver stack requires ", stackHeight + 2*driverEdgeMin,
+             " mm internal height; available ", boxIntHeight, " mm."));
+for (k = [0:len(enabledDriverIdx)-1]) {
+    j = enabledDriverIdx[k];
+    if (abs(z_for_driver(j)) + enabledFaceRadii[k] + driverEdgeMin > boxIntHeight/2)
+        echo(str("WARNING: Driver ", j, " exceeds vertical baffle clearance after manual Z offset."));
+}
+if (len(enabledDriverIdx) >= 2) for (k = [0:len(enabledDriverIdx)-2]) {
+    a = enabledDriverIdx[k]; b = enabledDriverIdx[k+1];
+    if (z_for_driver(a) - z_for_driver(b) < enabledFaceRadii[k] + enabledFaceRadii[k+1] + driverAutoGap - 0.001)
+        echo(str("WARNING: Drivers ", a, " and ", b, " have insufficient vertical spacing after offsets."));
+}
+
+// G-005: Check every enabled pair in the X/Z plane, including nonadjacent pairs.
+// Round-round and rectangle-rectangle checks are exact. Other face shapes
+// use conservative axis-aligned envelopes and may report near misses.
+if (len(enabledDriverIdx) >= 2)
+    for (ka = [0:len(enabledDriverIdx)-2], kb = [ka+1:len(enabledDriverIdx)-1]) {
+        a = enabledDriverIdx[ka]; b = enabledDriverIdx[kb];
+        if (driver_pair_overlaps(a,b))
+            echo(str("WARNING G-005: Driver faces ", a, " and ", b,
+                     " overlap in X/Z (or their conservative envelopes overlap)."));
+    }
+// G-006: Report silent X clamping and four-sided baffle clearance.
+for (k = [0:len(enabledDriverIdx)-1]) {
+    j = enabledDriverIdx[k];
+    if (abs(driver_x_requested(j)-driver_x_actual(j)) > 0.0001)
+        echo(str("WARNING G-006: Driver ", j, " requested X=", driver_x_requested(j),
+                 " mm was clamped to X=", driver_x_actual(j), " mm."));
+    if (abs(driver_x_actual(j)) + driver_half_width(j) + driverEdgeMin > boxIntWidth/2 + 0.0001)
+        echo(str("WARNING G-006: Driver ", j, " exceeds left/right inner baffle clearance."));
+    if (abs(z_for_driver(j)) + driver_half_height(j) + driverEdgeMin > boxIntHeight/2 + 0.0001)
+        echo(str("WARNING G-006: Driver ", j, " exceeds top/bottom inner baffle clearance."));
+}
 
 // ────────────────────────────────────────────────
 // BAFFLE DERIVED VALUES
@@ -262,6 +301,10 @@ else if (export_mode == 3) {
     baffle_full(coreW, coreH, THK, outerW, outerH,
                 baffleSlotPosX, baffleSlotPosZ,
                 baffleKeyPosX,  baffleKeyPosZ);
+    // Preview-only driver face reference, aligned with the baffle front (+Y).
+    // Only shown in baffle-only mode, never included in printable STL geometry.
+    if (showDriverFaces)
+        %driver_face_overlays(THK/2);
 }
 
 else if (export_mode == 4) {

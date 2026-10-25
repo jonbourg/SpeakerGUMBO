@@ -29,11 +29,11 @@
 
 $fn = 64;                  // Resolution - low for working, high for 3D printing.
 showSpecs       = true;    // Recommend leaving this to true all the time
-showDebug       = false;   // driver center debug cylinders
-showDriverFaces = false;   // driver face overlays on baffle
+showDebug       = true;   // driver center debug cylinders
+showDriverFaces = true;   // Preview-only driver face outlines; visible ONLY in export_mode = 3 (Baffle)
 
-// Distance in front of baffle to draw debug faces
-driverFaceOffset = 18.0;      // mm
+// Legacy setting retained for compatibility; overlays now sit 0.1 mm above baffle front.
+driverFaceOffset = 18.0;      // mm (not used by baffle overlay)
 IN=25.4;  // for converting inches to mm
 
 // ======================================================================
@@ -41,7 +41,7 @@ IN=25.4;  // for converting inches to mm
 // ======================================================================
 sealed = true;   // true = sealed, false = ported
 
-Vas = 0.022 * 28.3;     // Cubic feet * 28.3 to convert to cubic liters
+Vas = 10;     // Cubic feet * 28.3 to convert to cubic liters
 Qts = 0.77;
 Qtc = 0.9;
 
@@ -70,9 +70,9 @@ round_horizontal_edges = true;
 frontTrim              = edge_round_radius; 
 
 // Box geometry ratio's, use golden rule or your own
-boxHeightRatio = 1.15;
+boxHeightRatio = 3.0;
 boxWidthRatio  = 0.9;
-boxDepthRatio  = 1.00;
+boxDepthRatio  = 1.0;
 
 // Only enable during troubleshooting — comment out for clean console
 // echo("PARAMETERS DEBUG:");
@@ -100,9 +100,9 @@ driverModelNames = [
 
 // driverParams = [cutout dia, screw spacing, screw dia, enabled]
 driverParams = [
-    [1.385 * IN, 1.75 * IN, 2.8, false],   // Tweeter
-    [2.79 * IN, 84.1, 2.8, false],         // Midrange
-    [2.79 * IN, 84.1, 2.8, true]           // Woofer
+    [1.385 * IN, 1.75 * IN, 2.8, true],  // Tweeter OFF
+    [2.79 * IN, 84.1, 2.8, true],         // Midrange ON
+    [2.79 * IN, 84.1, 2.8, true]          // Woofer ON
 ];
 
 speakerFaceDiameters = [
@@ -191,17 +191,18 @@ driverAdjustCornerR = [
 // ======================================================================
 //  DRIVER POSITIONING OFFSETS 
 // ======================================================================
+driverAutoGap = 5;       // Automatic vertical gap between adjacent driver face envelopes (mm)
 driverEdgeMin = 3;     // Minimum distance from driver *frame edge* to any inner wall
 
-// Manual offsets, (+Z=up, -Z=down), (+X=right, -X=left)
+// Manual offsets, (+Z=up, -Z=down), (+X=right, -X=left), NOTE: Opposite when viewed from the front
 tweeterZ_offset = 0;
 tweeterX_offset = 0;
 
 midZ_offset = 0;
 midX_offset = 0;
 
-wooferZ_offset = 24.48;
-wooferX_offset = 8.48;
+wooferZ_offset = 0;     // Previously 24.48; set nonzero only for manual adjustment
+wooferX_offset = 0; // Existing horizontal customization retained
 
 // ======================================================================
 //  DRIVER BAFFLE SETTINGS

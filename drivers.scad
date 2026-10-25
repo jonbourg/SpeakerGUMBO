@@ -13,67 +13,64 @@ include <utils.scad>
 function getMargin(drivers) =
     drivers == [] ? 0 : max([for(d=drivers) d[3] ? d[0]/2 + 5 : 0]);
 
-function compute_z_positions_ordered(faceRadii, boxHeight) =
-    let(
-        n = len(faceRadii),
-        halfH = boxHeight/2,
-        bottomEdge = -halfH + 6,
-        topEdge = halfH - 6
-    )
+// Automatic top-to-bottom packing of enabled driver face envelopes.
+// Radii are ordered by enabledDriverIdx (tweeter, midrange, woofer).
+// The complete stack is centered vertically; manual offsets are applied ONCE
+// in z_for_driver(). Impossible fits are reported in the main file.
+function driver_stack_height(radii, gap) =
+    len(radii) == 0 ? 0 :
+    2 * sum_list(radii) + (len(radii) - 1) * gap;
+
+function sum_list(values, i = 0) =
+    i >= len(values) ? 0 : values[i] + sum_list(values, i + 1);
+
+function compute_z_positions_ordered(faceRadii, boxHeight, gap = 5) =
+    let(n = len(faceRadii), total = driver_stack_height(faceRadii, gap))
     n == 0 ? [] :
-    n == 1 ? [0] :
-    n == 2 ?
-        let(
-            tweeterR = faceRadii[0],
-            wooferR = faceRadii[1],
-            tweeter_baseZ = 0,
-            woofer_baseZ = 0,
-            tweeter_minZ = -halfH + tweeterR + driverEdgeMin,
-            tweeter_maxZ = halfH - tweeterR - driverEdgeMin,
-            woofer_minZ = -halfH + wooferR + driverEdgeMin,
-            woofer_maxZ = halfH - wooferR - driverEdgeMin,
-            tweeterZ = clampF(
-                tweeter_baseZ + tweeterZ_offset,
-                tweeter_minZ, tweeter_maxZ
-            ),
-            wooferZ = clampF(
-                woofer_baseZ + wooferZ_offset,
-                woofer_minZ, woofer_maxZ
-            )
-        ) [tweeterZ, wooferZ] :
-    n == 3 ?
-        let(
-            tweeterR = faceRadii[0],
-            midR = faceRadii[1],
-            wooferR = faceRadii[2],
-            tweeter_baseZ = halfH - tweeterR - driverEdgeMin,
-            mid_baseZ = 0,
-            woofer_baseZ = -halfH + wooferR + driverEdgeMin,
-            tweeter_minZ = -halfH + tweeterR + driverEdgeMin,
-            tweeter_maxZ = halfH - tweeterR - driverEdgeMin,
-            mid_minZ = -halfH + midR + driverEdgeMin,
-            mid_maxZ = halfH - midR - driverEdgeMin,
-            woofer_minZ = -halfH + wooferR + driverEdgeMin,
-            woofer_maxZ = halfH - wooferR - driverEdgeMin,
-            tweeterZ = clampF(tweeter_baseZ + tweeterZ_offset, tweeter_minZ, tweeter_maxZ),
-            midZ = clampF(mid_baseZ + midZ_offset, mid_minZ, mid_maxZ),
-            wooferZ = clampF(woofer_baseZ + wooferZ_offset, woofer_minZ, woofer_maxZ)
-        ) [tweeterZ, midZ, wooferZ] :
     [for (i = [0:n-1])
-        bottomEdge + (topEdge - bottomEdge) * (i / (n - 1))
+        total/2 -
+        (i == 0 ? 0 : 2 * sum_list([for (k = [0:i-1]) faceRadii[k]]) + i*gap) -
+        faceRadii[i]
     ];
 
+function driver_z_offset(i) =
+    i == 0 ? tweeterZ_offset : i == 1 ? midZ_offset : wooferZ_offset;
+
 function z_for_driver(i) =
-    let(
-        pos = search(i, enabledDriverIdx),
-        z_raw = (pos == []) ? undef : zPositions[pos[0]],
-        z_offset = (i == 0) ? tweeterZ_offset :
-                   (i == 1) ? midZ_offset :
-                              wooferZ_offset
-    )
-    (is_undef(z_raw) ? undef : z_raw + z_offset);
-  
-    
+    let(pos = search(i, enabledDriverIdx),
+        z_raw = pos == [] ? undef : zPositions[pos[0]])
+    is_undef(z_raw) ? undef : z_raw + driver_z_offset(i);
+
+// Shared positioning and clearance helpers (X/Z are baffle-plane coordinates).
+// The horizontal clamp is retained for compatibility with existing geometry.
+function driver_x_requested(i) =
+    i == 0 ? tweeterX_offset : i == 1 ? midX_offset : wooferX_offset;
+function driver_half_width(i) =
+    (driverFaceShape[i] == 2 || driverFaceShape[i] == 3)
+        ? driverRectSizes[i][0]/2 : speakerFaceDiameters[i]/2;
+function driver_half_height(i) =
+    (driverFaceShape[i] == 2 || driverFaceShape[i] == 3)
+        ? driverRectSizes[i][1]/2 : speakerFaceDiameters[i]/2;
+function driver_x_limit(i) =
+    max(0, boxIntWidth/2 - driver_half_width(i) - driverEdgeMin);
+function driver_x_actual(i) =
+    clampF(driver_x_requested(i), -driver_x_limit(i), driver_x_limit(i));
+function driver_is_rect(i) = driverFaceShape[i] == 3;
+// Circle-vs-circle and axis-aligned rectangle-vs-rectangle are exact.
+// Other shapes are conservatively enclosed by their bounding rectangles;
+// those warnings can include false positives, but should not miss collisions.
+function driver_pair_overlaps(a,b) =
+    let(dx = abs(driver_x_actual(a)-driver_x_actual(b)),
+        dz = abs(z_for_driver(a)-z_for_driver(b)),
+        ax = driver_half_width(a), az = driver_half_height(a),
+        bx = driver_half_width(b), bz = driver_half_height(b),
+        both_round = driverFaceShape[a] == 0 && driverFaceShape[b] == 0,
+        both_rect = driver_is_rect(a) && driver_is_rect(b))
+    both_round ? sqrt(dx*dx + dz*dz) < ax + bx - 0.0001 :
+    both_rect ? dx < ax+bx-0.0001 && dz < az+bz-0.0001 :
+    // Conservative axis-aligned envelopes for noncircular face profiles.
+    dx < ax+bx-0.0001 && dz < az+bz-0.0001;
+
 // ======================================================================
 // DRIVER DERIVED VALUES FOR GASKETS
 // ======================================================================
@@ -164,21 +161,8 @@ module box_driver_cutouts() {
         screwSpacing = driver[1];
         screwDia = driver[2];
         zPos = z_for_driver(j);
-        driverXoffset_raw =
-            j == 0 ? tweeterX_offset :
-            j == 1 ? midX_offset :
-                     wooferX_offset;
-        
-        innerHalfW = boxIntWidth / 2;
-        faceR = (driverFaceShape[j] == 3)
-            ? driverRectSizes[j][0] / 2
-            : speakerFaceDiameters[j] / 2;
-        
-        marginX = innerHalfW - faceR;
-        Xmax = (marginX <= 0) ? 0 :
-               (marginX <= driverEdgeMin) ? 0 :
-                                            (marginX - driverEdgeMin);
-        driverX = clampF(driverXoffset_raw, -Xmax, Xmax);
+        driverXoffset_raw = driver_x_requested(j);
+        driverX = driver_x_actual(j);
         
         screwCount = driverScrewCount[j];
         effectiveScrewSpacing = (screwSpacing <= 0) ? dia*1.05 : screwSpacing;
@@ -254,27 +238,16 @@ module driver_face_overlay_2d(shape, j) {
 }
 
 // Full 3D overlay module (called from main)
-module driver_face_overlays() {
+module driver_face_overlays(baffle_front_y) {
     if (showDriverFaces) {
         for (k = [0:len(enabledDriverIdx)-1]) {
             j = enabledDriverIdx[k];
             zPos = z_for_driver(j);
             shape = driverFaceShape[j];
-            driverXoffset_raw =
-                j == 0 ? tweeterX_offset :
-                j == 1 ? midX_offset :
-                         wooferX_offset;
-            
-            innerHalfW = boxIntWidth/2;
-            faceR_for_clamp = (shape == 3) ? driverRectSizes[j][0]/2 : speakerFaceDiameters[j]/2;
-            marginX = innerHalfW - faceR_for_clamp;
-            Xmax = (marginX <= 0) ? 0 :
-                   (marginX <= driverEdgeMin) ? 0 :
-                                                (marginX - driverEdgeMin);
-            driverX = clampF(driverXoffset_raw, -Xmax, Xmax);
+            driverX = driver_x_actual(j);
             
             // Pure 2D overlay – always transparent in preview & render
-            translate([driverX, boxIntDepth/2 + boxThickness + driverFaceOffset + 0.1, zPos])
+            translate([driverX, baffle_front_y + 0.1, zPos])
             rotate([90,0,0])
                 driver_face_overlay_2d(shape, j);  // ← no linear_extrude!
         }

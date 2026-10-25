@@ -156,21 +156,8 @@ module baffle_driver_features(THK) {
         recessDepth = driverRecessDepth[j];
         screwCount = driverScrewCount[j];
         zPos = z_for_driver(j);
-        driverXoffset_raw =
-            j == 0 ? tweeterX_offset :
-            j == 1 ? midX_offset :
-                     wooferX_offset;
-        
-        innerHalfW = boxIntWidth / 2;
-        faceR = (shape == 3)
-            ? driverRectSizes[j][0] / 2
-            : speakerFaceDiameters[j] / 2;
-        marginX = innerHalfW - faceR;
-        Xmax =
-            (marginX <= 0) ? 0 :
-            (marginX <= driverEdgeMin) ? 0 :
-                                         (marginX - driverEdgeMin);
-        driverX = clampF(driverXoffset_raw, -Xmax, Xmax);
+        driverXoffset_raw = driver_x_requested(j);
+        driverX = driver_x_actual(j);
         
         echo("Processing driver", j, "at Z:", zPos, "X offset:", driverXoffset_raw);
         
