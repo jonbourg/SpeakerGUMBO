@@ -2,6 +2,24 @@
 
 # G.U.M.B.O. Changelog
 
+## [Unreleased]
+
+### Added
+- Automatic vertical spacing for multiple speaker drivers, with a configurable `driverAutoGap` parameter.
+- G-005 warning for overlapping speaker drivers.
+- G-006 warnings when driver positioning exceeds enclosure boundaries.
+
+### Improved
+- Manual X and Z driver positioning while retaining automatic vertical spacing.
+- Driver-position clamping to keep drivers within permitted baffle boundaries.
+- Driver-face overlays now display correctly on the baffle in export mode 3.
+
+### Tested
+- All seven single-driver, two-driver, and three-driver configurations.
+- Automatic spacing and manual positioning offsets.
+- Insufficient enclosure height warnings.
+- Driver overlap detection and horizontal boundary clamping.
+
 ## v0.1.4 – Back Panel Terminals & Mounting Improvements
 
 ### Added
